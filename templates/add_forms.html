@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{{ wtf.quick_form(form1,form_type='horizontal',horizontal_columns=('sm',4,4),button_map={'submit': 'primary'}) }}
+<p>{{ msg1 }}</p>
+{% endblock %}
