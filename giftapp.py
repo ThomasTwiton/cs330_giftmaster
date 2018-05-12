@@ -1,7 +1,8 @@
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
-from forms import AddPerson, AddDate, AddGift
+from forms import AddPerson, AddDate, AddGift, QueryGift
 import records
+import sqlite3
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -73,7 +74,45 @@ def addgift():
 
     return render_template("add_forms.html", form1 = giftform, msg1='')
 
+@app.route('/roster')
+def getroster():
+    conn = sqlite3.connect('giftmaster.db')
+    cur = conn.cursor()
+    cur.execute('select first_name, last_name, relationship, nickname, middle_name from roster_test')
+    res = cur.fetchall()
+    return render_template("roster.html", data = res, theader = cur)
+
+@app.route('/upcoming_dates')
+def getdates():
+    conn = sqlite3.connect('giftmaster.db')
+    cur = conn.cursor()
+    cur.execute('select roster_test.first_name, roster_test.last_name, date_test.eventdescription, date_test.eventdate from date_test join roster_test on roster_test.id=date_test.id where date_test.eventdate >= date("now") order by date_test.eventdate')
+    res = cur.fetchall()
+    return render_template("dates.html", data = res, theader = cur)
+
+@app.route('/gift_ideas', methods=['GET', 'POST'])
+def getgifts():
+    db = records.Database('sqlite:///giftmaster.db')
+    res=db.query('select first_name, last_name, id from roster_test')
+
+    selectperson = QueryGift()
+    selectperson.person.choices = []
+
+    for name in res:
+        pid = name.id
+        display = name.first_name + " " + name.last_name
+        selectperson.person.choices += [(pid, display)]
     
+    if selectperson.validate_on_submit():
+        conn = sqlite3.connect('giftmaster.db')
+        cur = conn.cursor()
+        cur.execute(('select gift_test.giftidea, gift_test.url from gift_test join roster_test on roster_test.id=gift_test.id where roster_test.id=="'+selectperson.person.data+'"'))
+        res = cur.fetchall()
+
+        return render_template('ideas.html', form1=selectperson, ideasfor = selectperson.person.data, data=res)
+    return render_template('ideas.html', form1=selectperson, ideasfor='', data=[])
+
+
 
 if __name__=='__main__':
     app.run(debug=True)

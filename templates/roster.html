@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class=container>
+    <h1>My People</h1>
+    <table class="table table-striped">
+        <tr>
+            <th>{{theader.description[0][0]}}</th>
+            <th>{{theader.description[1][0]}}</th>
+            <th>{{theader.description[2][0]}}</th>
+            <th>{{theader.description[3][0]}}</th>
+            <th>{{theader.description[4][0]}}</th>
+        </tr>
+        {% for i in range(0, data|length)%}
+        <tr> 
+            <td>{{data[i][0]}}</td>
+            <td>{{data[i][1]}}</td>
+            <td>{{data[i][2]}}</td>
+            <td>{{data[i][3]}}</td>
+            <td>{{data[i][4]}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

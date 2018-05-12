@@ -23,3 +23,7 @@ class AddGift(FlaskForm):
     gift = TextField("Gift Idea:", [validators.Required("Please describe your gift idea")])
     link = TextField("Amazon URL", [validators.Required("Include a URL or put n/a")])
     submit = SubmitField("Add Gift Idea")
+
+class QueryGift(FlaskForm):
+    person = SelectField("Gift idea for whom?",[validators.Required("Please pick a person")])
+    submit = SubmitField("Refresh")
