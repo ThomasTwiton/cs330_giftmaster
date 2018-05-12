@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
-from forms import AddPerson, AddDate
+from forms import AddPerson, AddDate, AddGift
 import records
 
 app = Flask(__name__)
@@ -43,12 +43,35 @@ def adddate():
     if dateform.validate_on_submit():
         db.query('insert into date_test values ("'
             +dateform.person.data + '", "'
-            +dateform.date.data + '", "'
+            +str(dateform.date.data) + '", "'
             +dateform.description.data + '")'
         )
-        return render_template("add_forms.html", form1 = dateform, msg1='Date added to person')
+        return render_template("add_forms.html", form1 = dateform, msg1='Date recorded')
 
     return render_template("add_forms.html", form1 = dateform, msg1='')
+
+@app.route('/add_gift', methods=['GET', 'POST'])
+def addgift():
+    db = records.Database('sqlite:///giftmaster.db')
+    res=db.query('select first_name, last_name, id from roster_test')
+
+    giftform = AddGift()
+    giftform.person.choices = []
+
+    for name in res:
+        pid = name.id
+        display = name.first_name + " " + name.last_name
+        giftform.person.choices += [(pid, display)]
+
+    if giftform.validate_on_submit():
+        db.query('insert into gift_test values ("'
+            +giftform.person.data + '", "'
+            +giftform.gift.data + '", "'
+            +giftform.link.data + '")'
+        )
+        return render_template("add_forms.html", form1 = giftform, msg1='Gift idea recorded')
+
+    return render_template("add_forms.html", form1 = giftform, msg1='')
 
     
 

@@ -14,7 +14,12 @@ class AddPerson(FlaskForm):
 
 class AddDate(FlaskForm):
     person = SelectField("Important date for whom?",[validators.Required("Please pick a person")])
-    date = TextField("Date of the event (mm/dd/yyyy):",[validators.Required("Please enter a date in MM/DD/YYYY form")])
+    date = DateField("Date of the event (mm/dd/yyyy):",format ='%m/%d/%Y')
     description = TextField("Description:",[validators.Required("Please enter a description of the date")])
     submit = SubmitField("Add Date")
-    
+
+class AddGift(FlaskForm):
+    person = SelectField("Gift idea for whom?",[validators.Required("Please pick a person")])
+    gift = TextField("Gift Idea:", [validators.Required("Please describe your gift idea")])
+    link = TextField("Amazon URL", [validators.Required("Include a URL or put n/a")])
+    submit = SubmitField("Add Gift Idea")
