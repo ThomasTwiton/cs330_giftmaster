@@ -1,12 +1,19 @@
 from flask import Flask, request, render_template
 from flask_bootstrap import Bootstrap
-from forms import AddPerson, AddDate, AddGift, QueryGift
+from forms import AddPerson, AddDate, AddGift, QueryGift, Login
 import records
 import sqlite3
+
+#default database tables#
+class Tables():
+    roster = "roster_test"
+    gift = "gift_test"
+    date = "date_test"
 
 app = Flask(__name__)
 Bootstrap(app)
 app.secret_key = 'giftmaster'
+tables = Tables()
 
 #Routes#
 @app.route('/add_roster', methods=['GET', 'POST'])
@@ -16,7 +23,7 @@ def addpeople():
     if addform.validate_on_submit():
         #print(addform.first_name.data)
         db = records.Database('sqlite:///giftmaster.db')
-        db.query('insert into roster_test values ("'
+        db.query('insert into ' + tables.roster + ' values ("'
             +addform.first_name.data+'", "'
             +addform.last_name.data+'", "'
             +addform.middle_name.data+'", "'
@@ -31,7 +38,7 @@ def addpeople():
 @app.route('/add_date', methods=['GET', 'POST'])
 def adddate():
     db = records.Database('sqlite:///giftmaster.db')
-    res=db.query('select first_name, last_name, id from roster_test')
+    res=db.query('select first_name, last_name, id from '+tables.roster)
 
     dateform = AddDate()
     dateform.person.choices = []
@@ -42,7 +49,7 @@ def adddate():
         dateform.person.choices += [(pid, display)]
 
     if dateform.validate_on_submit():
-        db.query('insert into date_test values ("'
+        db.query('insert into ' + tables.date +' values ("'
             +dateform.person.data + '", "'
             +str(dateform.date.data) + '", "'
             +dateform.description.data + '")'
@@ -54,7 +61,7 @@ def adddate():
 @app.route('/add_gift', methods=['GET', 'POST'])
 def addgift():
     db = records.Database('sqlite:///giftmaster.db')
-    res=db.query('select first_name, last_name, id from roster_test')
+    res=db.query('select first_name, last_name, id from ' + tables.roster)
 
     giftform = AddGift()
     giftform.person.choices = []
@@ -65,7 +72,7 @@ def addgift():
         giftform.person.choices += [(pid, display)]
 
     if giftform.validate_on_submit():
-        db.query('insert into gift_test values ("'
+        db.query('insert into ' + tables.gift +' values ("'
             +giftform.person.data + '", "'
             +giftform.gift.data + '", "'
             +giftform.link.data + '")'
@@ -78,7 +85,7 @@ def addgift():
 def getroster():
     conn = sqlite3.connect('giftmaster.db')
     cur = conn.cursor()
-    cur.execute('select first_name, last_name, relationship, nickname, middle_name from roster_test')
+    cur.execute('select first_name, last_name, relationship, nickname, middle_name from '+ tables.roster)
     res = cur.fetchall()
     return render_template("roster.html", data = res, theader = cur)
 
@@ -86,14 +93,14 @@ def getroster():
 def getdates():
     conn = sqlite3.connect('giftmaster.db')
     cur = conn.cursor()
-    cur.execute('select roster_test.first_name, roster_test.last_name, date_test.eventdescription, date_test.eventdate from date_test join roster_test on roster_test.id=date_test.id where date_test.eventdate >= date("now") order by date_test.eventdate')
+    cur.execute('select '+tables.roster+'.first_name, '+tables.roster+'.last_name, '+tables.date+'.eventdescription, '+tables.date+'.eventdate from '+tables.date+' join '+tables.roster+' on '+tables.roster+'.id='+tables.date+'.id where '+tables.date+'.eventdate >= date("now") order by '+tables.date+'.eventdate')
     res = cur.fetchall()
     return render_template("dates.html", data = res, theader = cur)
 
 @app.route('/gift_ideas', methods=['GET', 'POST'])
 def getgifts():
     db = records.Database('sqlite:///giftmaster.db')
-    res=db.query('select first_name, last_name, id from roster_test')
+    res=db.query('select first_name, last_name, id from '+tables.roster)
 
     selectperson = QueryGift()
     selectperson.person.choices = []
@@ -106,12 +113,27 @@ def getgifts():
     if selectperson.validate_on_submit():
         conn = sqlite3.connect('giftmaster.db')
         cur = conn.cursor()
-        cur.execute(('select gift_test.giftidea, gift_test.url from gift_test join roster_test on roster_test.id=gift_test.id where roster_test.id=="'+selectperson.person.data+'"'))
+        cur.execute(('select '+tables.gift+'.giftidea, '+tables.gift+'.url from '+tables.gift+' join '+tables.roster+' on '+tables.roster+'.id='+tables.gift+'.id where '+tables.roster+'.id=="'+selectperson.person.data+'"'))
         res = cur.fetchall()
 
         return render_template('ideas.html', form1=selectperson, ideasfor = selectperson.person.data, data=res)
     return render_template('ideas.html', form1=selectperson, ideasfor='', data=[])
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    logger=Login()
+    if logger.validate_on_submit():
+        tables.roster = ("roster_" + logger.username.data)
+        tables.gift = ("gift_" + logger.username.data)
+        tables.date = ("date_" + logger.username.data)
+        #print([roster, gift, date])
+        db = records.Database('sqlite:///giftmaster.db')
+        db.query('create table if not exists '+ tables.roster + '(first_name text, last_name text, middle_name text, nickname text, relationship text, id text)')
+        db.query('create table if not exists ' + tables.gift + '(id text, giftidea text, url text)')
+        db.query('create table if not exists ' + tables.date + '(id text, eventdate date, eventdescription)')
+
+        return render_template('login.html', form1=logger, msg= ('Logged in as '+ logger.username.data))
+    return render_template('login.html', form1=logger, msg='')
 
 
 if __name__=='__main__':

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class=container>
+    <h1>Welcome!</h1>
+    <p>Let us help you keep track of gift ideas and important dates for the people who matter to you</p>
+    {{ wtf.quick_form(form1,form_type='horizontal',horizontal_columns=('sm',4,4),button_map={'submit': 'primary'}) }}
+    <p>{{ msg }}</p>
+</div>
+{% endblock %}

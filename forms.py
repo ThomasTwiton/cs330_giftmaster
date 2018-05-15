@@ -27,3 +27,7 @@ class AddGift(FlaskForm):
 class QueryGift(FlaskForm):
     person = SelectField("Gift idea for whom?",[validators.Required("Please pick a person")])
     submit = SubmitField("Refresh")
+
+class Login(FlaskForm):
+    username = TextField("Enter username:",[validators.Required("Please enter a username")])
+    submit = SubmitField("Log In")
