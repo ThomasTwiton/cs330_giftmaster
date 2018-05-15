@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from forms import AddPerson, AddDate, AddGift, QueryGift, Login
 import records
 import sqlite3
+import json
 
 #default database tables#
 class Tables():
@@ -119,7 +120,7 @@ def getgifts():
         return render_template('ideas.html', form1=selectperson, ideasfor = selectperson.person.data, data=res)
     return render_template('ideas.html', form1=selectperson, ideasfor='', data=[])
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def login():
     logger=Login()
     if logger.validate_on_submit():
@@ -135,6 +136,20 @@ def login():
         return render_template('login.html', form1=logger, msg= ('Logged in as '+ logger.username.data))
     return render_template('login.html', form1=logger, msg='')
 
+@app.route('/deleter', methods=['GET', 'POST'])
+def deleter():
+    rec_todel = request.json
+    
+    #print(len(rec_todel))
+    db = records.Database('sqlite:///giftmaster.db')
+    if(len(rec_todel)==5):
+        db.query('delete from '+tables.roster+ ' where first_name="'+rec_todel["first_name"]+'" and last_name="'+rec_todel["last_name"]+'" and middle_name="' + rec_todel['middle_name']+ '" and nickname="' + rec_todel['nickname']+ '" and relationship="'+rec_todel['relationship']+'"')
+    if(len(rec_todel)==2):
+        db.query('delete from '+tables.gift+' where giftidea="'+rec_todel['Gift Idea']+'" and url="'+rec_todel['URL']+'"')
+    if(len(rec_todel)==4):
+        db.query('delete from '+tables.date+' where eventdescription="'+rec_todel['eventdescription']+'" and eventdate="'+rec_todel['eventdate']+'"')
+    
+    return ''
 
 if __name__=='__main__':
     app.run(debug=True)

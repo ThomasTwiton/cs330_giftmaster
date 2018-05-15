@@ -12,11 +12,11 @@
   <span class="icon-bar"></span>
   <span class="icon-bar"></span>
 </button>
-      <a class="navbar-brand" href="/login">Giftmaster</a>
+      <a class="navbar-brand" href="/">Giftmaster</a>
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
     <ul class="nav navbar-nav">
-      <li class="active"><a href="/login">Login</a></li>
+      <li><a href="/">Login</a></li>
       <li><a href="/add_roster">Add People</a></li>
       <li><a href="/add_date">Add Dates</a></li>
       <li><a href="/add_gift">Add Gift Ideas</a></li>
@@ -27,4 +27,39 @@
   </div>
   </div>
 </nav>
+
+<script type=text/javascript>
+  function deleter(tablename){
+      table = document.querySelector('#mytable')
+      headers = document.querySelector('#headers')
+  
+      for(let i=0; i < table.rows.length; i++){
+          thisrow = table.rows[i]
+          checkdex = thisrow.childElementCount-1
+          checkbox = thisrow.cells[checkdex]
+          checkbox = checkbox.firstElementChild
+          //console.log(checkbox.checked)
+
+          if(checkbox.checked){
+            rec = {}
+            for(let i=0; i<thisrow.cells.length-1; i++){
+              rec[headers.cells[i].innerText] = thisrow.cells[i].innerText
+            }
+
+            console.log(rec)
+            fetch('http://127.0.0.1:5000/deleter', {
+              headers: {'Accept':'application/json','Content-Type':'application/json'},
+              method: 'post',
+              body: JSON.stringify(rec)
+            })
+            .then(function(response){
+              console.log("promise received")
+              location.reload()
+            })
+          }
+
+          
+      }
+  }
+</script>
 {% endblock %}

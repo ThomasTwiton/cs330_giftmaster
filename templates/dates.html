@@ -4,20 +4,25 @@
 <div class=container>
     <h1>My Upcoming Events</h1>
     <table class="table table-striped">
-        <tr>
+        <tr id=headers>
             <th>{{theader.description[0][0]}}</th>
             <th>{{theader.description[1][0]}}</th>
             <th>{{theader.description[2][0]}}</th>
             <th>{{theader.description[3][0]}}</th>
+            <th>Cancel Event</th>
         </tr>
+        <tbody id=mytable>
         {% for i in range(0, data|length)%}
         <tr> 
             <td>{{data[i][0]}}</td>
             <td>{{data[i][1]}}</td>
             <td>{{data[i][2]}}</td>
             <td>{{data[i][3]}}</td>
+            <td><input type="checkbox"></td>
         </tr>
         {% endfor %}
+        </tbody>
     </table>
+    <button onclick="deleter('date')" class="btn btn-primary">Remove Canceled Events</button>
 </div>
 {% endblock %}

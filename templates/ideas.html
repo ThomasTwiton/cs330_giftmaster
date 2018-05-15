@@ -6,16 +6,21 @@
     {{ wtf.quick_form(form1,form_type='horizontal',horizontal_columns=('sm',4,4),button_map={'submit': 'primary'}) }}
     
     <table class="table table-striped">
-        <tr>
+        <tr id=headers>
             <th>Gift Idea</th>
             <th>URL</th>
+            <th>Bought</th>
         </tr>
+        <tbody id=mytable>
         {% for i in range(0, data|length)%}
-        <tr> 
+        <tr>            
             <td>{{data[i][0]}}</td>
             <td>{{data[i][1]}}</td>
+            <td><input type="checkbox"></td> 
         </tr>
         {% endfor %}
+        </tbody>
     </table>
+    <button onclick="deleter('gift')" class="btn btn-primary">Delete Bought Gifts</button>
 </div>
 {% endblock %}
